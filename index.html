@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RAL Forms — RAMS</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;background:#f9fafb;padding:16px;font-size:15px;}
+input,textarea,select,button{font-family:sans-serif;font-size:15px;}
+input[type=text],textarea{width:100%;padding:10px 12px;border-radius:6px;border:1px solid #e5e7eb;color:#111827;background:#fff;outline:none;}
+input[type=text]:focus,textarea:focus{border-color:#2563EB;}
+textarea{resize:vertical;}
+button{cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState} = React;
+const BG="#ffffff",BORDER="#e5e7eb",TEXT="#111827",MUTED="#6b7280",BLUE="#2563EB",LBLUE="#EFF6FF";
+const PRIMARY_EMAIL = "info@edgewise.nz";
+const ERA_LOGO_B64 = "data:image/png;base64,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";
+
+function Field({label,value,onChange,placeholder,multiline,rows=3}){
+  return(
+    <div style={{marginBottom:12}}>
+      {label&&<div style={{fontSize:13,color:MUTED,marginBottom:4,fontWeight:500}}>{label}</div>}
+      {multiline
+        ?<textarea value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} rows={rows}/>
+        :<input type="text" value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}/>
+      }
+    </div>
+  );
+}
+
+function Section({num,title,children}){
+  return(
+    <div style={{marginBottom:20,background:BG,borderRadius:10,border:`1px solid ${BORDER}`,overflow:"hidden"}}>
+      <div style={{background:"#111827",padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
+        <span style={{background:BLUE,color:"#fff",borderRadius:"50%",width:24,height:24,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,flexShrink:0}}>{num}</span>
+        <span style={{color:"#fff",fontWeight:600,fontSize:14}}>{title}</span>
+      </div>
+      <div style={{padding:16}}>{children}</div>
+    </div>
+  );
+}
+
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC9zaPvtQuyl0OIln5y_ZqiJaOV4TYMlLtBRnEqqaOtFWBqV8uQQ_Amsh49A7Lgk-Ezw/exec";
+
+function App(){
+  const todayStr = new Date().toLocaleDateString("en-NZ");
+  const [form,setForm]=useState({
+    projectName:"",date:todayStr,location:"",workfaceNumber:"",
+    company:"",technicians:"",teamLeader:"",
+    description:"",equipment:"",method:"",emergency:"",ppe:""
+  });
+  const [clients,setClients]=useState([{name:"",mobile:""}]);
+  const [hazards,setHazards]=useState([{hazard:"",risk:"",control:""}]);
+  const [signers,setSigners]=useState([{initials:"",signed:false}]);
+  const [generating,setGenerating]=useState(false);
+  const [sending,setSending]=useState(false);
+  const [ccEmail,setCcEmail]=useState("info@edgewise.nz");
+
+  const set=k=>v=>setForm(p=>({...p,[k]:v}));
+  const addClient=()=>setClients(p=>[...p,{name:"",mobile:""}]);
+  const removeClient=i=>setClients(p=>p.filter((_,j)=>j!==i));
+  const setClient=(i,k,v)=>setClients(p=>p.map((c,j)=>j===i?{...c,[k]:v}:c));
+  const addHazard=()=>setHazards(p=>[...p,{hazard:"",risk:"",control:""}]);
+  const removeHazard=i=>setHazards(p=>p.filter((_,j)=>j!==i));
+  const setHz=(i,k,v)=>setHazards(p=>p.map((r,j)=>j===i?{...r,[k]:v}:r));
+  const addSigner=()=>setSigners(p=>[...p,{initials:"",signed:false}]);
+  const removeSigner=i=>setSigners(p=>p.filter((_,j)=>j!==i));
+  const setSgn=(i,k,v)=>setSigners(p=>p.map((s,j)=>j===i?{...s,[k]:v}:s));
+  const allSigned=signers.every(s=>s.signed&&s.initials.trim());
+
+  const buildPDF = async () => {
+    const ref="RAL-"+Date.now().toString().slice(-6);
+    const today=new Date().toLocaleDateString("en-NZ");
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+    const W=210,M=15,CW=W-M*2;
+    let y=M;
+    try{pdf.addImage(ERA_LOGO_B64,"PNG",M,y,40,20);}catch(e){}
+    pdf.setFont("helvetica","bold");pdf.setFontSize(24);pdf.setTextColor(17,24,39);
+    pdf.text("RAMS",W/2,y+9,{align:"center"});
+    pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(100,100,100);
+    pdf.text("Rope Access Method Statement",W/2,y+15,{align:"center"});
+    pdf.setFontSize(9);
+    pdf.text("Ref: "+ref,W-M,y+6,{align:"right"});
+    pdf.text(today,W-M,y+11,{align:"right"});
+    y+=22;
+    pdf.setDrawColor(17,24,39);pdf.setLineWidth(0.8);pdf.line(M,y,W-M,y);y+=7;
+    const sec=(n,t)=>{if(y>260){pdf.addPage();y=M;}pdf.setFont("helvetica","bold");pdf.setFontSize(12);pdf.setTextColor(17,24,39);pdf.text(n+". "+t,M,y);y+=2;pdf.setLineWidth(0.4);pdf.line(M,y,W-M,y);y+=5;};
+    const field=(label,val)=>{if(y>272){pdf.addPage();y=M;}pdf.setFont("helvetica","bold");pdf.setFontSize(9);pdf.setTextColor(100,100,100);pdf.text(label.toUpperCase()+": ",M,y);const lw=pdf.getTextWidth(label.toUpperCase()+": ");pdf.setFont("helvetica","normal");pdf.setTextColor(37,99,235);const lines=pdf.splitTextToSize(val||"—",CW-lw);pdf.text(lines,M+lw,y);y+=lines.length*5;};
+    const body=(txt)=>{if(y>272){pdf.addPage();y=M;}pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(37,99,235);const lines=pdf.splitTextToSize(txt||"—",CW);lines.forEach(l=>{if(y>275){pdf.addPage();y=M;}pdf.text(l,M,y);y+=5;});y+=2;};
+    sec(1,"Project Details");
+    field("Project Name",form.projectName);
+    field("Date",form.date);
+    field("Location",form.location);
+    field("Workface Notification No.",form.workfaceNumber);
+    field("Company",form.company);
+    clients.forEach((c,i)=>{
+      field(clients.length>1?`Client ${i+1}`:"Client",c.name);
+      field(clients.length>1?`Mobile ${i+1}`:"Mobile",c.mobile);
+    });
+    field("Technicians",form.technicians);
+    field("Team Leader",form.teamLeader);
+    y+=2;
+    sec(2,"Description of Work");body(form.description);
+    sec(3,"Specific Rope Access Equipment");body(form.equipment);
+    sec(4,"Method Statement");body(form.method);
+    sec(5,"Risk Assessment");
+    if(y>220){pdf.addPage();y=M;}
+    const cw=CW/3;
+    pdf.setFillColor(17,24,39);pdf.rect(M,y,CW,8,"F");
+    pdf.setFont("helvetica","bold");pdf.setFontSize(9);pdf.setTextColor(255,255,255);
+    pdf.text("Hazard",M+2,y+5.5);pdf.text("Risk",M+cw+2,y+5.5);pdf.text("Control",M+cw*2+2,y+5.5);
+    y+=8;
+    hazards.forEach((h,i)=>{if(y>268){pdf.addPage();y=M;}pdf.setFillColor(i%2===0?255:249,249,249);pdf.rect(M,y,CW,10,"F");pdf.setDrawColor(209,213,219);pdf.setLineWidth(0.2);pdf.rect(M,y,CW,10,"S");pdf.line(M+cw,y,M+cw,y+10);pdf.line(M+cw*2,y,M+cw*2,y+10);pdf.setFont("helvetica","normal");pdf.setFontSize(9);pdf.setTextColor(17,24,39);pdf.text(pdf.splitTextToSize(h.hazard||"—",cw-4)[0],M+2,y+6.5);pdf.text(pdf.splitTextToSize(h.risk||"—",cw-4)[0],M+cw+2,y+6.5);pdf.text(pdf.splitTextToSize(h.control||"—",cw-4)[0],M+cw*2+2,y+6.5);y+=10;});y+=4;
+    sec(6,"Emergency / Rescue Plan");body(form.emergency);
+    sec(7,"PPE for this Specific Job");body(form.ppe);
+    if(y>200){pdf.addPage();y=M;}
+    sec(8,"Sign Off");
+    pdf.setFillColor(254,249,195);pdf.setDrawColor(234,179,8);pdf.setLineWidth(0.3);
+    const wt=pdf.splitTextToSize("This RAMS must reflect the actual work being carried out on site. If the scope of work, equipment, hazards, or work method changes, this document must be updated and communicated to all technicians before work continues.",CW-4);
+    const wh=wt.length*5+6;
+    pdf.rect(M,y,CW,wh,"FD");
+    pdf.setFont("helvetica","normal");pdf.setFontSize(8);pdf.setTextColor(133,79,11);
+    pdf.text(wt,M+2,y+5);y+=wh+4;
+    if(y>240){pdf.addPage();y=M;}
+    pdf.setDrawColor(17,24,39);pdf.setLineWidth(0.5);pdf.rect(M,y,CW,36,"S");
+    pdf.setFont("helvetica","normal");pdf.setFontSize(9);pdf.setTextColor(100,100,100);
+    pdf.text("Technician initials:",M+3,y+7);
+    let sx=M+3;
+    signers.forEach((s,i)=>{pdf.setFont("times","bold");pdf.setFontSize(22);pdf.setTextColor(17,24,39);pdf.text(s.initials.toUpperCase(),sx,y+20);pdf.setLineWidth(0.4);pdf.line(sx,y+22,sx+20,y+22);pdf.setFont("helvetica","normal");pdf.setFontSize(8);pdf.setTextColor(100,100,100);pdf.text("Tech "+(i+1),sx,y+27);sx+=26;});
+    pdf.setFontSize(8);pdf.setTextColor(100,100,100);
+    pdf.text("Signed off: "+today,M+3,y+33);y+=40;
+    pdf.setFont("helvetica","normal");pdf.setFontSize(8);pdf.setTextColor(150,150,150);
+    pdf.text("Document reference: "+ref+" · ACORED RAMS · Generated by RAL Forms",M,287);
+    return {pdf, ref, today};
+  };
+
+  const download = async () => {
+    if(!allSigned){alert("All technicians must add initials and sign off before downloading.");return;}
+    setGenerating(true);
+    try{
+      const {pdf,ref} = await buildPDF();
+      pdf.save("RAMS-"+(form.projectName||"document").replace(/\s+/g,"-")+"-"+ref+".pdf");
+    }catch(err){alert("Error: "+err.message);}
+    finally{setGenerating(false);}
+  };
+
+  const sendEmail = async () => {
+    if(!allSigned){alert("All technicians must add initials and sign off before sending.");return;}
+    setSending(true);
+    try{
+      const {pdf,ref} = await buildPDF();
+      const pdfBase64 = pdf.output("datauristring").split(",")[1];
+      const jsonData = JSON.stringify({form, clients, hazards, signers, ref}, null, 2);
+      const payload = {
+        to_email: ccEmail.trim() || PRIMARY_EMAIL,
+        cc_email: PRIMARY_EMAIL,
+        project_name: form.projectName || "RAMS",
+        ref: ref,
+        pdf_base64: pdfBase64,
+        json_data: jsonData
+      };
+      await fetch(SCRIPT_URL, {method:"POST",mode:"no-cors",body:JSON.stringify(payload)});
+      alert("RAMS sent successfully to " + (ccEmail.trim() || PRIMARY_EMAIL) + "! Check your inbox.");
+    }catch(err){
+      alert("Error sending: "+err.message);
+    }finally{
+      setSending(false);
+    }
+  };
+
+  return(
+    <div style={{fontFamily:"sans-serif",background:"#f9fafb",minHeight:"100vh"}}>
+      <div style={{background:BG,borderRadius:12,border:`1px solid ${BORDER}`,padding:"16px 24px",marginBottom:18,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+        <img src={ERA_LOGO_B64} alt="Edgewise" style={{height:52,objectFit:"contain"}}/>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:26,fontWeight:900,color:TEXT,letterSpacing:2}}>RAMS</div>
+          <div style={{fontSize:13,color:MUTED}}>Rope Access Method Statement</div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
+          <label style={{background:LBLUE,color:BLUE,border:"1px solid #BFDBFE",borderRadius:6,padding:"6px 14px",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>
+            ✎ Edit RAMS — upload JSON file
+            <input type="file" accept=".json" style={{display:"none"}} onChange={e=>{
+              const file=e.target.files[0];
+              if(!file)return;
+              const fr=new FileReader();
+              fr.onload=ev=>{
+                try{
+                  let raw;
+                  try{ raw=JSON.parse(ev.target.result); }
+                  catch(e){ throw new Error("File is not valid JSON"); }
+                  let d = raw;
+                  if(raw.json_data){
+                    try{ d = typeof raw.json_data==="string" ? JSON.parse(raw.json_data) : raw.json_data; }
+                    catch(e){ d = raw; }
+                  }
+                  if(!d.form && !d.hazards && !d.clients){
+                    throw new Error("No RAMS data found in this file");
+                  }
+                  if(d.form){
+                    const {client, crew, ...cleanForm} = d.form;
+                    setForm(f=>({...f,...cleanForm}));
+                    if(!d.clients && client){
+                      setClients([{name:client, mobile:""}]);
+                    }
+                  }
+                  if(d.clients && d.clients.length) setClients(d.clients);
+                  if(d.hazards && d.hazards.length) setHazards(d.hazards);
+                  if(d.signers && d.signers.length) setSigners(d.signers.map(s=>({...s,signed:false})));
+                  alert("RAMS loaded! Review and re-sign before sending.");
+                }catch(err){ alert("Could not load file: "+err.message); }
+              };
+              fr.readAsText(file);
+              e.target.value="";
+            }}/>
+          </label>
+        </div>
+      </div>
+
+      <Section num="1" title="Project Details">
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <Field label="Project Name" value={form.projectName} onChange={set("projectName")} placeholder=""/>
+          <Field label="Date" value={form.date} onChange={set("date")} placeholder="e.g. 8/04/26"/>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <Field label="Location" value={form.location} onChange={set("location")} placeholder="Full address"/>
+          <Field label="Workface Notification Number" value={form.workfaceNumber} onChange={set("workfaceNumber")} placeholder="e.g. WFN-001"/>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,alignItems:"start"}}>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:13,color:MUTED,marginBottom:4,fontWeight:500}}>Technicians Involved</div>
+            <textarea value={form.technicians} onChange={e=>{set("technicians")(e.target.value);e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}}
+              placeholder="Names separated by commas" rows={1}
+              style={{width:"100%",padding:"10px 12px",borderRadius:6,border:`1px solid ${BORDER}`,color:TEXT,background:"#fff",outline:"none",resize:"none",overflow:"hidden",lineHeight:1.5}}/>
+          </div>
+          <Field label="Team Leader" value={form.teamLeader} onChange={set("teamLeader")} placeholder="Name"/>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,alignItems:"start"}}>
+          <Field label="Company" value={form.company} onChange={set("company")} placeholder="Company name"/>
+          <div>
+            {clients.map((c,i)=>(
+              <div key={i} style={{marginBottom:8,padding:10,background:"#f9fafb",borderRadius:8,border:`1px solid ${BORDER}`}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:8,alignItems:"end"}}>
+                  <div>
+                    <div style={{fontSize:13,color:MUTED,marginBottom:4,fontWeight:500}}>
+                      {clients.length>1?`Client ${i+1}`:"Client (name)"}
+                    </div>
+                    <input type="text" value={c.name} onChange={e=>setClient(i,"name",e.target.value)} placeholder="Full name"/>
+                  </div>
+                  <div>
+                    <div style={{fontSize:13,color:MUTED,marginBottom:4,fontWeight:500}}>
+                      {clients.length>1?`Mobile ${i+1}`:"Mobile"}
+                    </div>
+                    <input type="text" value={c.mobile} onChange={e=>setClient(i,"mobile",e.target.value)} placeholder="+64 21 000 0000"/>
+                  </div>
+                  {clients.length>1
+                    ? <button onClick={()=>removeClient(i)} style={{background:"#FCEBEB",color:"#991B1B",border:"none",borderRadius:4,padding:"2px 8px",fontSize:16,fontWeight:700,marginBottom:1}}>×</button>
+                    : <div/>
+                  }
+                </div>
+              </div>
+            ))}
+            <button onClick={addClient} style={{background:LBLUE,color:BLUE,border:"1px solid #BFDBFE",borderRadius:6,padding:"6px 14px",fontSize:13,fontWeight:600}}>+ Add client</button>
+          </div>
+        </div>
+      </Section>
+
+      <Section num="2" title="Description of Work">
+        <div style={{fontSize:13,color:MUTED,marginBottom:8,fontStyle:"italic"}}>Brief explanation of the task</div>
+        <Field value={form.description} onChange={set("description")} placeholder="Describe the work..." multiline rows={4}/>
+      </Section>
+      <Section num="3" title="Specific Rope Access Equipment to be Used">
+        <Field value={form.equipment} onChange={set("equipment")} placeholder="List all rope access equipment..." multiline rows={3}/>
+      </Section>
+      <Section num="4" title="Method Statement">
+        <div style={{fontSize:13,color:MUTED,marginBottom:8,fontStyle:"italic"}}>How the work will be done</div>
+        <Field value={form.method} onChange={set("method")} placeholder="Step by step method..." multiline rows={5}/>
+      </Section>
+      <Section num="5" title="Risk Assessment">
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",marginBottom:12}}>
+            <thead>
+              <tr>
+                {["Hazard","Risk","Control"].map(h=>(
+                  <th key={h} style={{background:"#111827",color:"#fff",padding:"10px 12px",fontSize:13,fontWeight:600,textAlign:"left",border:"1px solid #1f2937"}}>{h}</th>
+                ))}
+                <th style={{background:"#111827",width:40,border:"1px solid #1f2937"}}/>
+              </tr>
+            </thead>
+            <tbody>
+              {hazards.map((row,i)=>(
+                <tr key={i} style={{background:i%2===0?BG:"#f9fafb"}}>
+                  {["hazard","risk","control"].map(k=>(
+                    <td key={k} style={{padding:6,border:`1px solid ${BORDER}`,verticalAlign:"top"}}>
+                      <textarea value={row[k]} onChange={e=>setHz(i,k,e.target.value)}
+                        placeholder={k.charAt(0).toUpperCase()+k.slice(1)+"..."} rows={2}
+                        style={{width:"100%",border:"none",outline:"none",resize:"vertical",fontSize:13,background:"transparent",color:TEXT}}/>
+                    </td>
+                  ))}
+                  <td style={{padding:6,border:`1px solid ${BORDER}`,textAlign:"center",verticalAlign:"middle"}}>
+                    {hazards.length>1&&<button onClick={()=>removeHazard(i)} style={{background:"#FCEBEB",color:"#991B1B",border:"none",borderRadius:4,padding:"2px 8px",fontSize:16,fontWeight:700}}>×</button>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button onClick={addHazard} style={{background:LBLUE,color:BLUE,border:"1px solid #BFDBFE",borderRadius:6,padding:"6px 16px",fontSize:13,fontWeight:600}}>+ Add row</button>
+      </Section>
+      <Section num="6" title="Emergency / Rescue Plan">
+        <Field value={form.emergency} onChange={set("emergency")} placeholder="Describe emergency and rescue procedures..." multiline rows={4}/>
+      </Section>
+      <Section num="7" title="PPE for this Specific Job">
+        <Field value={form.ppe} onChange={set("ppe")} placeholder="List all required PPE..." multiline rows={3}/>
+      </Section>
+      <Section num="8" title="Sign Off">
+        <div style={{background:"#FEF9C3",border:"1px solid #EAB308",borderRadius:6,padding:"10px 14px",fontSize:13,color:"#854F0B",marginBottom:16}}>
+          This RAMS must reflect the actual work being carried out on site. If the scope of work, equipment, hazards, or work method changes, this document must be updated and communicated to all technicians before work continues.
+        </div>
+        {signers.map((s,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"flex-end",gap:12,flexWrap:"wrap",marginBottom:12,padding:12,background:"#f9fafb",borderRadius:8,border:`1px solid ${BORDER}`}}>
+            <div style={{flex:"0 0 130px"}}>
+              <div style={{fontSize:13,color:MUTED,marginBottom:4,fontWeight:500}}>Technician {i+1} initials</div>
+              <input type="text" value={s.initials} onChange={e=>setSgn(i,"initials",e.target.value.slice(0,4).toUpperCase())}
+                placeholder="e.g. LG" maxLength={4}
+                style={{width:"100%",padding:"8px 12px",borderRadius:6,border:`2px solid ${s.signed?"#16a34a":BORDER}`,fontSize:26,fontWeight:900,fontFamily:"Georgia,serif",color:TEXT,textAlign:"center",letterSpacing:6,background:BG}}/>
+            </div>
+            <div style={{flex:2,minWidth:180}}>
+              <div style={{fontSize:13,color:MUTED,marginBottom:4,fontWeight:500}}>Sign off</div>
+              <div onClick={()=>setSgn(i,"signed",!s.signed)}
+                style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:s.signed?"#F0FDF4":"#f9fafb",border:`1px solid ${s.signed?"#86EFAC":BORDER}`,borderRadius:6,cursor:"pointer"}}>
+                <div style={{width:20,height:20,borderRadius:4,background:s.signed?"#16a34a":BG,border:`2px solid ${s.signed?"#16a34a":"#9ca3af"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  {s.signed&&<span style={{color:"#fff",fontSize:14,fontWeight:700}}>✓</span>}
+                </div>
+                <span style={{fontSize:13,color:s.signed?"#15803d":MUTED}}>{s.signed?"Signed off":"I confirm this RAMS is accurate"}</span>
+              </div>
+            </div>
+            {signers.length>1&&<button onClick={()=>removeSigner(i)} style={{background:"#FCEBEB",color:"#991B1B",border:"none",borderRadius:6,padding:"6px 12px",fontSize:13,fontWeight:600}}>Remove</button>}
+          </div>
+        ))}
+        <button onClick={addSigner} style={{background:LBLUE,color:BLUE,border:"1px solid #BFDBFE",borderRadius:6,padding:"6px 16px",fontSize:13,fontWeight:600}}>+ Add technician initials</button>
+      </Section>
+
+      <div style={{marginBottom:32,maxWidth:480,margin:"0 auto 32px"}}>
+        <div style={{marginBottom:14}}>
+          <div style={{fontSize:13,color:MUTED,marginBottom:4,fontWeight:500}}>Send to email</div>
+          <input type="text" value={ccEmail} onChange={e=>setCcEmail(e.target.value)}
+            placeholder="email@example.com"
+            style={{width:"100%",padding:"10px 12px",borderRadius:6,border:`1px solid ${BORDER}`,fontSize:14,color:TEXT,background:BG}}/>
+        </div>
+        <div style={{display:"flex",gap:10,flexDirection:"column"}}>
+          <button onClick={sendEmail} disabled={sending||!allSigned}
+            style={{background:allSigned?"#111827":"#9ca3af",color:"#fff",border:"none",borderRadius:10,padding:"14px 40px",fontSize:15,fontWeight:700,cursor:allSigned?"pointer":"not-allowed",width:"100%"}}>
+            {sending?"Sending...":"📧 Send RAMS by email (PDF + JSON)"}
+          </button>
+          <button onClick={download} disabled={generating||!allSigned}
+            style={{background:allSigned?"#2563EB":"#9ca3af",color:"#fff",border:"none",borderRadius:10,padding:"12px 40px",fontSize:14,fontWeight:600,cursor:allSigned?"pointer":"not-allowed",width:"100%"}}>
+            {generating?"Generating...":"⬇ Download PDF only"}
+          </button>
+        </div>
+        {!allSigned&&<div style={{fontSize:13,color:MUTED,marginTop:8,textAlign:"center"}}>All technicians must add initials and sign off to enable</div>}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
